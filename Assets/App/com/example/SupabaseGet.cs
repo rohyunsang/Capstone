@@ -3,15 +3,14 @@ using Supabase;
 using UnityEngine;
 using Client = Supabase.Client;
 using System.Collections.Generic;
-using Postgrest.Models;
+using Postgrest.Models; // Postgrest.Models.BaseModels
 
 namespace com.example
 {
-    public class product : BaseModel
+    public class product : BaseModel  //
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        
 
         public override bool Equals(object obj)
         {
@@ -26,7 +25,7 @@ namespace com.example
 
     }
 
-    public class ImageFetcher : MonoBehaviour
+    public class SupabaseGet : MonoBehaviour
     {
         public SupabaseSettings SupabaseSettings = null!;
         private Client client;
@@ -42,9 +41,9 @@ namespace com.example
             await supabase.InitializeAsync();
 
             var result = await supabase.From<product>().Select("name").Get();
-            List<product> res = result.Models;
-            foreach(var ress in res){
-                Debug.Log(ress.Name);
+            List<product> products = result.Models;
+            foreach(var product in products){
+                Debug.Log(product.Name);
             }
             
         }
