@@ -9,18 +9,26 @@ namespace com.example
 {
     public class product : BaseModel  //
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public string model_code{ get; set; }
+        public int stock{ get; set; }
+        public int brand_id { get; set; }
+        public int price { get; set; } 
+        public string description { get; set; }
+        public string image_url { get; set; }
+
+
 
         public override bool Equals(object obj)
         {
             return obj is product productInstance &&
-                    Id == productInstance.Id;
+                    id == productInstance.id;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id);
+            return HashCode.Combine(id);
         }
 
     }
@@ -43,7 +51,7 @@ namespace com.example
             var result = await supabase.From<product>().Select("name").Get();
             List<product> products = result.Models;
             foreach(var product in products){
-                Debug.Log(product.Name);
+                Debug.Log(product.name);
             }
             
         }
