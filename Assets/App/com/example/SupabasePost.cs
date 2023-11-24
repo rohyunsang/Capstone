@@ -23,7 +23,6 @@ namespace com.example
 
             var supabase = new Supabase.Client(SupabaseSettings.SupabaseURL, SupabaseSettings.SupabaseAnonKey, options);
             await supabase.InitializeAsync();
-
 #region DB Subscribe 
 
             await supabase.From<product>().On(PostgresChangesOptions.ListenType.Inserts, (sender, change) =>
