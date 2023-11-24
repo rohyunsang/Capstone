@@ -9,6 +9,7 @@ public class ObjectInstance : MonoBehaviour
     public GameObject clothProduct;
     public Texture2D[] cloths;
 
+    /*
     public void InstantiateCloth() //using btn StartBtn in InitPanel
     {
         for (int i = 0; i < 4; i++)
@@ -28,6 +29,9 @@ public class ObjectInstance : MonoBehaviour
             }
         }
     }
+    */
+
+    
 }
 
 

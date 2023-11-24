@@ -29,14 +29,11 @@ public class BasketDestroy : MonoBehaviour
                 if (childText.name == "PriceText")
                 {
                     int clothPrice = (-1) * int.Parse(childText.text);
-                    currentPriceManager.GetComponent<CurrentPrice>().CurrnetPriceUpdate(clothPrice);
                     break;
                 }
             }
             Destroy(child.gameObject);
-            basketCounterTextObject.GetComponent<BasketCounter>().basketCount--;
         }
-        basketCounterTextObject.GetComponent<Text>().text = basketCounterTextObject.GetComponent<BasketCounter>().basketCount.ToString();
     }
     
 }

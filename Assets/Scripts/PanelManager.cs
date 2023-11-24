@@ -12,7 +12,6 @@ public class PanelManager : MonoBehaviour
     public GameObject SettingPanel;
     public GameObject InitPanel;
     public GameObject PurchasePanel;
-    public GameObject ZoomImagePanel;
     public GameObject NaviPanel;
     public GameObject MainPanel;
     public void OnMainPanel(){
@@ -52,19 +51,11 @@ public class PanelManager : MonoBehaviour
         PurchasePanel.SetActive(true);
         OffPurchasePanel(); // 일단 구매기능이 없으니 구매를 건너뜀.
     }
-    public void OnZoomImagePanel()
-    {
-        ZoomImagePanel.SetActive(true);
-    }
     public void OnNaviPanel(){
         NaviPanel.SetActive(true);
     }
     public void OffNaviPanel(){
         NaviPanel.SetActive(false);
-    }
-    public void OffZoomImagePanel()
-    {
-        ZoomImagePanel.SetActive(false);
     }
     public void OffInitPanel()
     {

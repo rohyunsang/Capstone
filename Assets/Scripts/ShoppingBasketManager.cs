@@ -101,7 +101,7 @@ public class ShoppingBasketManager : MonoBehaviour  // use '담기' button
                 if (childText.name == "PriceText")
                 {
                     int clothCopyPrice = (-1) * int.Parse(childText.text);
-                    currentPriceManager.GetComponent<CurrentPrice>().CurrnetPriceUpdate(clothCopyPrice);
+                    //currentPriceManager.GetComponent<CurrentPrice>().CurrnetPriceUpdate(clothCopyPrice);
                     break;
                 }
             }
