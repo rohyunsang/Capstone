@@ -29,6 +29,7 @@ public class WebCam : MonoBehaviour
     public Sprite retryIconImage;
     public Image captureButtonImage;
 
+
     void Start()
     {
         if (!Permission.HasUserAuthorizedPermission(Permission.Camera))
@@ -68,7 +69,7 @@ public class WebCam : MonoBehaviour
         display.gameObject.SetActive(true);
     }
 
-    public void WebCamCapture()
+    public void WebCamCapture() // using WebCamCaptureButton
     {
         snap = new Texture2D(camTexture.width, camTexture.height, TextureFormat.RGBA32, false);
         snap.SetPixels(camTexture.GetPixels());
@@ -79,6 +80,7 @@ public class WebCam : MonoBehaviour
         display.gameObject.SetActive(false);
 
         captureButtonImage.sprite = retryIconImage;
+        SaveSnapAsJpg();
     }
 
     public void WebCamCaptureButton()
@@ -90,12 +92,11 @@ public class WebCam : MonoBehaviour
 
     public void WebCamStopButton() // using Btn : CloseBtn in Virtual Fitting Panel
     {
-        countingImage.SetActive(false);
         camTexture.Stop();
         captureImage.gameObject.SetActive(false);
     }
 
-    public void SaveSnapAsJpeg()
+    public void SaveSnapAsJpg()
     {
         // snap이 null이 아닌지 확인
         if (snap == null)
@@ -107,6 +108,7 @@ public class WebCam : MonoBehaviour
         // JPG로 인코딩
         byte[] jpgBytes = snap.EncodeToJPG();
 
+        SupaManager.Instance.SetImageBytes(jpgBytes);
     }
 
 }
