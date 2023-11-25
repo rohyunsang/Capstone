@@ -14,6 +14,12 @@ public class PanelManager : MonoBehaviour
     public GameObject PurchasePanel;
     public GameObject NaviPanel;
     public GameObject MainPanel;
+    public GameObject MeasurePanel;
+
+    public void OffMeasurePanel()
+    {
+        MeasurePanel.SetActive(false);
+    }
     public void OnMainPanel(){
         MainPanel.SetActive(true);
     }
