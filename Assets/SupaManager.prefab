@@ -9,8 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 434476507094486397}
-  - component: {fileID: 8380047752138287592}
-  - component: {fileID: 4732953006874778499}
   m_Layer: 0
   m_Name: SupaManager
   m_TagString: Untagged
@@ -33,29 +31,3 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8380047752138287592
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7974424658437878063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9ed2d41afbe4c84ab3f7fb5bdd0e921, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SupabaseSettings: {fileID: 11400000, guid: 43f3a69127f7acf42911537ad66e4f27, type: 2}
---- !u!114 &4732953006874778499
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7974424658437878063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e914457554ff3e24abbdb1b3c7ad8fdf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SupabaseSettings: {fileID: 11400000, guid: 43f3a69127f7acf42911537ad66e4f27, type: 2}
