@@ -1,14 +1,41 @@
 using Postgrest.Models; // Postgrest.Models.BaseModels
 using Supabase;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Client = Supabase.Client;
 using FileOptions = Supabase.Storage.FileOptions;
+using UnityEngine.UI;
 
 namespace com.example
 {
     #region DB
+    public class product : BaseModel  //
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string model_code { get; set; }
+        public int stock { get; set; }
+        public int brand_id { get; set; }
+        public int price { get; set; }
+        public string description { get; set; }
+        public string image_url { get; set; }
+
+
+
+        public override bool Equals(object obj)
+        {
+            return obj is product productInstance &&
+                    id == productInstance.id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(id);
+        }
+
+    }
     public class user_img : BaseModel
     {
         public string user_id { get; set; }
@@ -46,11 +73,20 @@ namespace com.example
     #endregion 
     public class SupaManager : MonoBehaviour
     {
+        public GameObject instanceObj;
         public static SupaManager Instance { get; private set; } // singleton
         public SupabaseSettings SupabaseSettings = null!;
         private Client supabase;
-        public Texture2D texture2D;
         public byte[] imageBytes;
+        public List<string> image_urls;
+        [SerializeField]
+        public List<product> products;
+        public List<Texture2D> texture2Ds;
+        public List<byte[]> bytes;
+
+        public Transform scrollViewMain;
+        public GameObject clothProduct;
+
         private async void Awake()
         {
             // 싱글톤 인스턴스 초기화
@@ -73,6 +109,33 @@ namespace com.example
             supabase = new Supabase.Client(SupabaseSettings.SupabaseURL, SupabaseSettings.SupabaseAnonKey, options);
             await supabase.InitializeAsync();
         }
+
+        public async void GetProductPath()  //using StartBtn in InitPanel
+        {
+            var productPaths = await supabase.From<product>().Get();
+            products = productPaths.Models;
+            foreach(var product in products)
+            {
+                image_urls.Add(product.image_url);
+                Debug.Log(product.image_url);
+                GetProductImage(product);
+            }
+        }
+        public async void GetProductImage(product product)
+        {
+            string keyword = "folder/";
+            int startIndex = product.image_url.IndexOf(keyword);
+            string sub_url = "";
+            sub_url = product.image_url.Substring(startIndex);
+            Debug.Log(sub_url);
+            
+            var objects = await supabase.Storage
+                          .From("clothes")
+                          .Download(sub_url, (sender, progress) => Debug.Log($"{progress}%"));
+            Texture2D texture = ConvertToTexture2D(objects);
+            InstantiateCloth(texture, product);
+        }
+        
 
         public async void UploadHeight(int height)  // using debug button
         {
@@ -119,12 +182,6 @@ namespace com.example
             };
 
             await supabase.From<user_img>().Upsert(model);
-
-            
-            
-            
-            
-
         }
         public async void DownResultImage()
         {
@@ -150,6 +207,42 @@ namespace com.example
             catch (Exception ex)
             {
                 Debug.LogError("Error saving image: " + ex.Message);
+            }
+        }
+
+        private Texture2D ConvertToTexture2D(byte[] imageBytes)
+        {
+            Texture2D texture = new Texture2D(2, 2);
+            if (imageBytes != null && imageBytes.Length > 0)
+            {
+                if (texture.LoadImage(imageBytes))
+                {
+                    texture.Apply();
+                    return texture;
+                }
+            }
+            return null;
+        }
+
+        public void InstantiateCloth(Texture2D texture, product product) //using btn StartBtn in InitPanel
+        {
+            //size setting is GridLay Out Group
+            GameObject instance = Instantiate(clothProduct, scrollViewMain);
+
+            // Find the 'ClothImage' child object of the instance and insert Texture2D cloths
+            Transform clothImageTransform = instance.transform.Find("ClothImage");
+            Transform clothNameTransform  = instance.transform.Find("ClothName");
+            Transform clothPriceTransform = instance.transform.Find("ClothPrice");
+
+            if (clothImageTransform != null)
+            {
+                Image clothImage = clothImageTransform.GetComponent<Image>();
+                clothImage.sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f);
+                Text nameText = clothNameTransform.GetComponent<Text>();
+                nameText.text = product.name;
+                Text priceText = clothPriceTransform.GetComponent<Text>();
+                priceText.text = product.price.ToString("N0");
+                instance.name = product.id.ToString();
             }
         }
     }
