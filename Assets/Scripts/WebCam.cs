@@ -60,9 +60,7 @@ public class WebCam : MonoBehaviour
         WebCamDevice device = WebCamTexture.devices[currentIndex];
         camTexture = new WebCamTexture(device.name, Screen.width, Screen.height);
         camTexture.requestedFPS = 30;
-        // 기기에 따라 카메라의 기본 회전을 확인하고 조정합니다.
-        int camRotation = -camTexture.videoRotationAngle;
-        display.rectTransform.localEulerAngles = new Vector3(0, 0, camRotation);
+        
 
         display.texture = camTexture;
         camTexture.Play();
@@ -71,6 +69,8 @@ public class WebCam : MonoBehaviour
 
     public void WebCamCapture() // using WebCamCaptureButton
     {
+        countingImage.SetActive(false);
+
         snap = new Texture2D(camTexture.width, camTexture.height, TextureFormat.RGBA32, false);
         snap.SetPixels(camTexture.GetPixels());
         snap.Apply();
@@ -87,7 +87,9 @@ public class WebCam : MonoBehaviour
     {
         display.gameObject.SetActive(true);
         captureImage.gameObject.SetActive(false);
-        Invoke("WebCamCapture", 3f);
+        countingImage.SetActive(true);
+        StartCoroutine(Timer());
+        Invoke("WebCamCapture", 5f);
     }
 
     public void WebCamStopButton() // using Btn : CloseBtn in Virtual Fitting Panel
@@ -108,7 +110,18 @@ public class WebCam : MonoBehaviour
         // JPG로 인코딩
         byte[] jpgBytes = snap.EncodeToJPG();
 
-        SupaManager.Instance.SetImageBytes(jpgBytes);
+        SupaManager.Instance.UploadImage(jpgBytes);
+    }
+
+    IEnumerator Timer()
+    {
+        int timeLeft = 5; // 타이머 시작 시간 설정
+        while (timeLeft >= 0)
+        {
+            timerText.text = timeLeft.ToString(); // 타이머 텍스트 업데이트
+            yield return new WaitForSeconds(1); // 1초 기다림
+            timeLeft--; // 시간 감소
+        }
     }
 
 }

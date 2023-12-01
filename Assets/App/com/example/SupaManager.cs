@@ -7,10 +7,17 @@ using UnityEngine;
 using Client = Supabase.Client;
 using FileOptions = Supabase.Storage.FileOptions;
 using UnityEngine.UI;
+using Supabase.Realtime.PostgresChanges;
 
 namespace com.example
 {
     #region DB
+    public class b_user_height : BaseModel
+    {
+        public int b_height { get; set; }
+        public string user_id { get; set; }
+    }
+
     public class product : BaseModel  //
     {
         public int id { get; set; }
@@ -73,7 +80,6 @@ namespace com.example
     #endregion 
     public class SupaManager : MonoBehaviour
     {
-        public GameObject instanceObj;
         public static SupaManager Instance { get; private set; } // singleton
         public SupabaseSettings SupabaseSettings = null!;
         private Client supabase;
@@ -86,6 +92,14 @@ namespace com.example
 
         public Transform scrollViewMain;
         public GameObject clothProduct;
+
+        public Text widthText;
+        public Text sSleeveText;
+        public Text lSleeveText;
+
+        public GameObject widthPraceHolder;
+        public GameObject sSleevePraceHolder;
+        public GameObject lSleevePraceHolder;
 
         private async void Awake()
         {
@@ -108,13 +122,15 @@ namespace com.example
 
             supabase = new Supabase.Client(SupabaseSettings.SupabaseURL, SupabaseSettings.SupabaseAnonKey, options);
             await supabase.InitializeAsync();
+
+            SubscribeUserSizeTable();
         }
 
         public async void GetProductPath()  //using StartBtn in InitPanel
         {
             var productPaths = await supabase.From<product>().Get();
             products = productPaths.Models;
-            foreach(var product in products)
+            foreach (var product in products)
             {
                 image_urls.Add(product.image_url);
                 Debug.Log(product.image_url);
@@ -128,54 +144,42 @@ namespace com.example
             string sub_url = "";
             sub_url = product.image_url.Substring(startIndex);
             Debug.Log(sub_url);
-            
+
             var objects = await supabase.Storage
                           .From("clothes")
                           .Download(sub_url, (sender, progress) => Debug.Log($"{progress}%"));
             Texture2D texture = ConvertToTexture2D(objects);
             InstantiateCloth(texture, product);
         }
-        
+
 
         public async void UploadHeight(int height)  // using debug button
         {
-            var model = new user_size()
+            var model = new b_user_height()
             {
                 user_id = "db438da4-6bc4-4c10-9bde-6b52fab38e4f",
-                height = height
+                b_height = height
 
             };
 
-            await supabase.From<user_size>().Insert(model);
-            UploadImage();
-
+            await supabase.From<b_user_height>().Upsert(model);
         }
-        /*
-        public async void SubscribeTable()
-        {
 
 
-            // after Unsubscribe from a channel
-        }
-        */
-        
-        public void SetImageBytes(byte[] imageBytes)
+
+        public async void UploadImage(byte[] imageBytes)
         {
-            this.imageBytes = imageBytes;
+            Debug.Log("UploadImage Call");
             SaveImage(imageBytes, "original.jpg");
-            
-        }
-        public async void UploadImage()
-        {
             // "db438da4-6bc4-4c10-9bde-6b52fab38e4f" is id
 
 
             var imagePath = Path.Combine(Application.persistentDataPath, "original.jpg");
             await supabase.Storage
-                          .From("user_result")
+                          .From("user_img")
                           .Upload(imagePath, "db438da4-6bc4-4c10-9bde-6b52fab38e4f/original.jpg", new FileOptions { CacheControl = "3600", Upsert = true });
-            
-             var model = new user_img()
+
+            var model = new user_img()
             {
                 user_id = "db438da4-6bc4-4c10-9bde-6b52fab38e4f",
                 original = "db438da4-6bc4-4c10-9bde-6b52fab38e4f/original.jpg"
@@ -183,15 +187,7 @@ namespace com.example
 
             await supabase.From<user_img>().Upsert(model);
         }
-        public async void DownResultImage()
-        {
-            /*
-             var result_image = await supabase.Storage.From("user_result").Download("db438da4-6bc4-4c10-9bde-6b52fab38e4f/result.jpg",null);
 
-            texture2D = new Texture2D(2, 2);
-            texture2D.LoadImage(result_image);
-             */
-        }
 
         public void SaveImage(byte[] imageBytes, string fileName)
         {
@@ -231,7 +227,7 @@ namespace com.example
 
             // Find the 'ClothImage' child object of the instance and insert Texture2D cloths
             Transform clothImageTransform = instance.transform.Find("ClothImage");
-            Transform clothNameTransform  = instance.transform.Find("ClothName");
+            Transform clothNameTransform = instance.transform.Find("ClothName");
             Transform clothPriceTransform = instance.transform.Find("ClothPrice");
 
             if (clothImageTransform != null)
@@ -244,6 +240,35 @@ namespace com.example
                 priceText.text = product.price.ToString("N0");
                 instance.name = product.id.ToString();
             }
+        }
+        /*
+        public async void DownResultImage()
+        {
+            
+             var result_image = await supabase.Storage.From("user_result").Download("db438da4-6bc4-4c10-9bde-6b52fab38e4f/result.jpg",null);
+
+            texture2D = new Texture2D(2, 2);
+            texture2D.LoadImage(result_image);
+            
+        }
+         */
+        
+
+
+        public async void SubscribeUserSizeTable()
+        {
+            await supabase.From<user_size>().On(PostgresChangesOptions.ListenType.All, (sender, change) =>
+            {
+                widthText.text = change.Model<user_size>().width.ToString();
+                sSleeveText.text = change.Model<user_size>().s_sleeve.ToString();
+                lSleeveText.text = change.Model<user_size>().l_sleeve.ToString();
+                Debug.Log(change.Model<user_size>().l_sleeve.ToString());
+
+                widthPraceHolder.SetActive(false);
+                sSleevePraceHolder.SetActive(false);
+                lSleevePraceHolder.SetActive(false);
+            });
+
         }
     }
 }

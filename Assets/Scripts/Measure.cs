@@ -11,6 +11,13 @@ public class Measure : MonoBehaviour
     public Button[] buttons;
     public Text placeHolder;
     public GameObject scrollView;
+    public GameObject WidthText;
+    public GameObject S_SleeveText;
+    public GameObject L_SleeveText;
+
+    public GameObject CheckBtn;
+    public GameObject NextBtn;
+
 
 
     public void OnclickHeightText()
@@ -45,5 +52,16 @@ public class Measure : MonoBehaviour
     {
         SupaManager.Instance.UploadHeight(int.Parse(heightText.text));
     }
-
+    public void ChangeButton()
+    {
+        CheckBtn.SetActive(false);
+        NextBtn.SetActive(true);
+    }
+    public void OnClickHeightUploadButton()
+    {
+        scrollView.SetActive(false);
+        WidthText.SetActive(true);
+        S_SleeveText.SetActive(true);
+        L_SleeveText.SetActive(true);
+    }
 }
