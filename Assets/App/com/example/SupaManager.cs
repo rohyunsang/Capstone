@@ -105,6 +105,7 @@ namespace com.example
 
         public List<GameObject> clothes = new List<GameObject>();
         public List<Texture2D> resultImages = new List<Texture2D>();
+        public List<string> urls = new List<string>();
 
 
         private async void Awake()
@@ -130,18 +131,8 @@ namespace com.example
             await supabase.InitializeAsync();
 
             SubscribeUserSizeTable();
-        }
+            DownResultPath();
 
-        public async void GetProductPath()  //using StartBtn in InitPanel
-        {
-            var productPaths = await supabase.From<product>().Get();
-            products = productPaths.Models;
-            foreach (var product in products)
-            {
-                image_urls.Add(product.image_url);
-                Debug.Log(product.image_url);
-                GetProductImage(product);
-            }
         }
         public async void GetProductImage(product product)
         {
@@ -157,6 +148,53 @@ namespace com.example
             Texture2D texture = ConvertToTexture2D(objects);
             InstantiateCloth(texture, product);
         }
+
+        public async void DownResultPath()  // 결과 이미지 다운로드 부분
+        {
+            await supabase.From<user_result>().On(PostgresChangesOptions.ListenType.All, (sender, change) =>
+            {
+                string resultPath = change.Model<user_result>().result_img;
+                string keyword = "db438da4-6bc4-4c10-9bde-6b52fab38e4f/";
+                int startIndex = resultPath.IndexOf(keyword);
+                string sub_url = "";
+                sub_url = resultPath.Substring(startIndex);
+                urls.Add(sub_url);
+                Debug.Log(sub_url);
+                
+            });
+        }
+        
+        public async void DownResultImage()
+        {
+            var result_image = await supabase.Storage.From("user_result").Download(urls[0], null);
+            Texture2D texture = ConvertToTexture2D(result_image);
+            resultImages.Add(texture);
+        }
+        public async void UserResultTableUpload()  // 결과 이미지 다운로드 부분
+        {
+            var model = new user_result()
+            {
+                user_id = "db438da4-6bc4-4c10-9bde-6b52fab38e4f",
+                product_id = 1,
+                result_img = "https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_result/db438da4-6bc4-4c10-9bde-6b52fab38e4f/result_1.jpg"
+            };
+
+            await supabase.From<user_result>().Upsert(model);
+        }
+        // https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_result/db438da4-6bc4-4c10-9bde-6b52fab38e4f/result_1.jpg
+
+        public async void GetProductPath()  //using StartBtn in InitPanel
+        {
+            var productPaths = await supabase.From<product>().Get();
+            products = productPaths.Models;
+            foreach (var product in products)
+            {
+                image_urls.Add(product.image_url);
+                Debug.Log(product.image_url);
+                GetProductImage(product);
+            }
+        }
+        
 
 
         public async void UploadHeight(int height)  // using debug button
@@ -246,29 +284,8 @@ namespace com.example
                 priceText.text = product.price.ToString("N0");
                 instance.name = product.id.ToString();
             }
-
-
-
         }
         
-         public async void DownResultImage()
-         {
-            await supabase.From<user_result>().On(PostgresChangesOptions.ListenType.All, async (sender, change) =>
-            {
-                string resultPath = change.Model<user_result>().result_img;
-                var result_image = await supabase.Storage.From("user_result").Download(resultPath, null);
-
-                if (result_image != null && result_image.Length > 0)
-                {
-                    Texture2D texture = new Texture2D(2, 2);
-                    if (texture.LoadImage(result_image))
-                    {
-                        texture.Apply();
-                        resultImages.Add(texture);
-                    }
-                }
-            });
-         }
         
 
 
