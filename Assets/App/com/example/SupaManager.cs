@@ -1,13 +1,13 @@
 using Postgrest.Models; // Postgrest.Models.BaseModels
 using Supabase;
+using Supabase.Realtime.PostgresChanges;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 using Client = Supabase.Client;
 using FileOptions = Supabase.Storage.FileOptions;
-using UnityEngine.UI;
-using Supabase.Realtime.PostgresChanges;
 
 namespace com.example
 {
@@ -96,10 +96,16 @@ namespace com.example
         public Text widthText;
         public Text sSleeveText;
         public Text lSleeveText;
+        public Text recommendText;
 
         public GameObject widthPraceHolder;
         public GameObject sSleevePraceHolder;
         public GameObject lSleevePraceHolder;
+        public GameObject recommendPraceHolder;
+
+        public List<GameObject> clothes = new List<GameObject>();
+        public List<Texture2D> resultImages = new List<Texture2D>();
+
 
         private async void Awake()
         {
@@ -170,19 +176,19 @@ namespace com.example
         public async void UploadImage(byte[] imageBytes)
         {
             Debug.Log("UploadImage Call");
-            SaveImage(imageBytes, "original.jpg");
+            SaveImage(imageBytes, "original.jpeg");
             // "db438da4-6bc4-4c10-9bde-6b52fab38e4f" is id
 
 
-            var imagePath = Path.Combine(Application.persistentDataPath, "original.jpg");
+            var imagePath = Path.Combine(Application.persistentDataPath, "original.jpeg");
             await supabase.Storage
                           .From("user_img")
-                          .Upload(imagePath, "db438da4-6bc4-4c10-9bde-6b52fab38e4f/original.jpg", new FileOptions { CacheControl = "3600", Upsert = true });
+                          .Upload(imagePath, "db438da4-6bc4-4c10-9bde-6b52fab38e4f/original.jpeg", new FileOptions { CacheControl = "3600", Upsert = true });
 
             var model = new user_img()
             {
                 user_id = "db438da4-6bc4-4c10-9bde-6b52fab38e4f",
-                original = "db438da4-6bc4-4c10-9bde-6b52fab38e4f/original.jpg"
+                original = "https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_img/db438da4-6bc4-4c10-9bde-6b52fab38e4f/original.jpeg"
             };
 
             await supabase.From<user_img>().Upsert(model);
@@ -224,7 +230,7 @@ namespace com.example
         {
             //size setting is GridLay Out Group
             GameObject instance = Instantiate(clothProduct, scrollViewMain);
-
+            clothes.Add(instance);
             // Find the 'ClothImage' child object of the instance and insert Texture2D cloths
             Transform clothImageTransform = instance.transform.Find("ClothImage");
             Transform clothNameTransform = instance.transform.Find("ClothName");
@@ -240,19 +246,32 @@ namespace com.example
                 priceText.text = product.price.ToString("N0");
                 instance.name = product.id.ToString();
             }
-        }
-        /*
-        public async void DownResultImage()
-        {
-            
-             var result_image = await supabase.Storage.From("user_result").Download("db438da4-6bc4-4c10-9bde-6b52fab38e4f/result.jpg",null);
 
-            texture2D = new Texture2D(2, 2);
-            texture2D.LoadImage(result_image);
-            
+
+
         }
-         */
         
+         public async void DownResultImage()
+         {
+            await supabase.From<user_result>().On(PostgresChangesOptions.ListenType.All, async (sender, change) =>
+            {
+                string resultPath = change.Model<user_result>().result_img;
+                var result_image = await supabase.Storage.From("user_result").Download(resultPath, null);
+
+                if (result_image != null && result_image.Length > 0)
+                {
+                    Texture2D texture = new Texture2D(2, 2);
+                    if (texture.LoadImage(result_image))
+                    {
+                        texture.Apply();
+                        resultImages.Add(texture);
+                    }
+                }
+            });
+         }
+        
+
+
 
 
         public async void SubscribeUserSizeTable()
@@ -267,8 +286,36 @@ namespace com.example
                 widthPraceHolder.SetActive(false);
                 sSleevePraceHolder.SetActive(false);
                 lSleevePraceHolder.SetActive(false);
+                recommendPraceHolder.SetActive(false);
+                recommendText.text = DetermineSize(int.Parse(widthText.text));
             });
+            
+        }
+        string DetermineSize(int width)
+        {
+            string str1 = "고객님의 추천 사이즈는 ";
+            string str2 = " 입니다! ";
+            if (width <= 47)
+            {
 
+                return str1 + "S" + str2;
+            }
+            else if (width <= 49)
+            {
+                return str1 + "M" + str2;
+            }
+            else if (width <= 55)
+            {
+                return str1 + "L" + str2;
+            }
+            else if (width <= 60)
+            {
+                return str1 + "2XL" + str2;
+            }
+            else 
+            {
+                return str1 + "3XL" + str2;
+            }
         }
     }
 }

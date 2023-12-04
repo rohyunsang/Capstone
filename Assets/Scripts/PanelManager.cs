@@ -8,11 +8,9 @@ public class PanelManager : MonoBehaviour
 {
     public GameObject LoginPanel;
     public GameObject VirtualFittingPanel;
-    public GameObject VirtualFittingResultPanel;
     public GameObject SettingPanel;
     public GameObject InitPanel;
     public GameObject PurchasePanel;
-    public GameObject NaviPanel;
     public GameObject MainPanel;
     public GameObject MeasurePanel;
 
@@ -57,12 +55,6 @@ public class PanelManager : MonoBehaviour
         PurchasePanel.SetActive(true);
         OffPurchasePanel(); // 일단 구매기능이 없으니 구매를 건너뜀.
     }
-    public void OnNaviPanel(){
-        NaviPanel.SetActive(true);
-    }
-    public void OffNaviPanel(){
-        NaviPanel.SetActive(false);
-    }
     public void OffInitPanel()
     {
         InitPanel.SetActive(false);
@@ -74,10 +66,6 @@ public class PanelManager : MonoBehaviour
     public void OffVIrtualFittingPanel()
     {
         VirtualFittingPanel.SetActive(false);
-    }
-    public void OffVIrtualFittingResultPanel()
-    {
-        VirtualFittingResultPanel.SetActive(false);
     }
     public void OffSettingPanel()
     {

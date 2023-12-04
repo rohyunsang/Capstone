@@ -14,10 +14,10 @@ public class Measure : MonoBehaviour
     public GameObject WidthText;
     public GameObject S_SleeveText;
     public GameObject L_SleeveText;
+    public GameObject RecommendText;
 
     public GameObject CheckBtn;
     public GameObject NextBtn;
-
 
 
     public void OnclickHeightText()
@@ -63,5 +63,6 @@ public class Measure : MonoBehaviour
         WidthText.SetActive(true);
         S_SleeveText.SetActive(true);
         L_SleeveText.SetActive(true);
+        RecommendText.SetActive(true);
     }
 }
