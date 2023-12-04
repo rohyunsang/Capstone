@@ -1,6 +1,7 @@
 using Postgrest.Models; // Postgrest.Models.BaseModels
 using Supabase;
 using Supabase.Realtime.PostgresChanges;
+using Supabase.Storage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Client = Supabase.Client;
 using FileOptions = Supabase.Storage.FileOptions;
-
+//using System.Threading.Tasks;
 namespace com.example
 {
     #region DB
@@ -106,7 +107,7 @@ namespace com.example
         public List<GameObject> clothes = new List<GameObject>();
         public List<Texture2D> resultImages = new List<Texture2D>();
         public List<string> urls = new List<string>();
-
+        public Queue<byte[]> byteQueue = new Queue<byte[]>();
 
         private async void Awake()
         {
@@ -149,6 +150,15 @@ namespace com.example
             InstantiateCloth(texture, product);
         }
 
+        private void Update()
+        {
+            if (byteQueue.Count > 0)
+            {
+                Texture2D texture = ConvertToTexture2D(byteQueue.Dequeue());
+                resultImages.Add(texture);
+            }
+        }
+
         public async void DownResultPath()  // 결과 이미지 다운로드 부분
         {
             await supabase.From<user_result>().On(PostgresChangesOptions.ListenType.All, (sender, change) =>
@@ -160,15 +170,14 @@ namespace com.example
                 sub_url = resultPath.Substring(startIndex);
                 urls.Add(sub_url);
                 Debug.Log(sub_url);
-                
+                DownResultImage();
             });
         }
         
         public async void DownResultImage()
         {
             var result_image = await supabase.Storage.From("user_result").Download(urls[0], null);
-            Texture2D texture = ConvertToTexture2D(result_image);
-            resultImages.Add(texture);
+            byteQueue.Enqueue(result_image);
         }
         public async void UserResultTableUpload()  // 결과 이미지 다운로드 부분
         {
