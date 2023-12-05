@@ -19,6 +19,16 @@ namespace com.example
         public string user_id { get; set; }
     }
 
+    public class product_img : BaseModel
+    {
+        public int id { get; set; }
+        public DateTime created_at { get; set; }
+        public string image_url { get; set; }
+        public string resized_rul { get; set; }
+        public string seg_rul { get; set; }
+
+    }
+
     public class product : BaseModel  //
     {
         public int id { get; set; }
@@ -28,7 +38,8 @@ namespace com.example
         public int brand_id { get; set; }
         public int price { get; set; }
         public string description { get; set; }
-        public string image_url { get; set; }
+        public string category { get; set; }
+        public string product_img_id { get; set; }
 
 
 
@@ -88,6 +99,7 @@ namespace com.example
         public List<string> image_urls;
         [SerializeField]
         public List<product> products;
+        public List<product_img> product_imgs;
         public List<Texture2D> texture2Ds;
         public List<byte[]> bytes;
 
@@ -134,12 +146,14 @@ namespace com.example
             DownResultPath();
 
         }
-        public async void GetProductImage(product product)
+
+        
+         public async void GetProductImage(product product, product_img product_img)
         {
             string keyword = "folder/";
-            int startIndex = product.image_url.IndexOf(keyword);
+            int startIndex = product_img.image_url.IndexOf(keyword);
             string sub_url = "";
-            sub_url = product.image_url.Substring(startIndex);
+            sub_url = product_img.image_url.Substring(startIndex);
             Debug.Log(sub_url);
 
             var objects = await supabase.Storage
@@ -148,6 +162,8 @@ namespace com.example
             Texture2D texture = ConvertToTexture2D(objects);
             InstantiateCloth(texture, product);
         }
+         
+        
 
         private void Update()
         {
@@ -203,15 +219,22 @@ namespace com.example
         public async void GetProductPath()  //using StartBtn in InitPanel
         {
             var productPaths = await supabase.From<product>().Get();
+            var productImages = await supabase.From<product_img>().Get();
+
             products = productPaths.Models;
-            foreach (var product in products)
+            product_imgs = productImages.Models;
+
+
+            int idx = 0;
+            foreach (var product_img in product_imgs)
             {
-                image_urls.Add(product.image_url);
-                Debug.Log(product.image_url);
-                GetProductImage(product);
+                image_urls.Add(product_img.image_url);
+                Debug.Log(product_img.image_url);
+                GetProductImage(products[idx], product_img);
+                idx++;
             }
         }
-        
+
 
 
         public async void UploadHeight(int height)  // using debug button
