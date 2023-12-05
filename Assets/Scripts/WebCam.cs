@@ -30,6 +30,8 @@ public class WebCam : MonoBehaviour
     public Image captureButtonImage;
     public GameObject silhouetteRawImage;
 
+    public bool isRunningCam = false;
+
 
     void Start()
     {
@@ -57,14 +59,26 @@ public class WebCam : MonoBehaviour
 
     public void WebCamPlayButton()
     {
-        Debug.Log("WebCamPlayButtonClicked");
-        WebCamDevice device = WebCamTexture.devices[currentIndex];
-        camTexture = new WebCamTexture(device.name, Screen.width, Screen.height);
-        camTexture.requestedFPS = 30;      
+        if (isRunningCam)
+        {
 
-        display.texture = camTexture;
-        camTexture.Play();
-        display.gameObject.SetActive(true);
+        }
+        else
+        {
+            display.gameObject.SetActive(true);
+            silhouetteRawImage.SetActive(true);
+            Debug.Log("WebCamPlayButtonClicked");
+
+            WebCamDevice device = WebCamTexture.devices[currentIndex];
+            camTexture = new WebCamTexture(device.name, Screen.width, Screen.height);
+            camTexture.requestedFPS = 30;
+
+            display.texture = camTexture;
+            camTexture.Play();
+            display.gameObject.SetActive(true);
+            isRunningCam = true;
+        }
+        
     }
 
     public void WebCamCapture() // using WebCamCaptureButton
@@ -78,11 +92,14 @@ public class WebCam : MonoBehaviour
 
         captureImage.gameObject.SetActive(true);
         captureImage.sprite = Sprite.Create(snap, new Rect(0, 0, snap.width, snap.height), new Vector2(0.5f, 0.5f));
-        display.gameObject.SetActive(false);
 
         captureButtonImage.sprite = retryIconImage;
         
         SaveSnapAsJpg();
+    }
+    public void OriginIcon()
+    {
+        captureButtonImage.sprite = cameraIconImage;
     }
 
     public void WebCamCaptureButton()
@@ -93,12 +110,6 @@ public class WebCam : MonoBehaviour
         countingImage.SetActive(true);
         StartCoroutine(Timer());
         Invoke("WebCamCapture", 5f);
-    }
-
-    public void WebCamStopButton() // using Btn : CloseBtn in Virtual Fitting Panel
-    {
-        camTexture.Stop();
-        captureImage.gameObject.SetActive(false);
     }
 
     public static Texture2D RotateImage(Texture2D tex, float angleDegrees)

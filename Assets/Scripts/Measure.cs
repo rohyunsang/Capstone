@@ -65,4 +65,12 @@ public class Measure : MonoBehaviour
         L_SleeveText.SetActive(true);
         RecommendText.SetActive(true);
     }
+    public void OnClickNextPanelButton()
+    {
+        scrollView.SetActive(false);
+        WidthText.SetActive(false);
+        S_SleeveText.SetActive(false);
+        L_SleeveText.SetActive(false);
+        RecommendText.SetActive(false);
+    }
 }

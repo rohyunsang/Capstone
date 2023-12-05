@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Client = Supabase.Client;
 using FileOptions = Supabase.Storage.FileOptions;
-//using System.Threading.Tasks;
+
 namespace com.example
 {
     #region DB
@@ -106,8 +106,7 @@ namespace com.example
 
         public List<GameObject> clothes = new List<GameObject>();
         public List<Texture2D> resultImages = new List<Texture2D>();
-        public List<string> urls = new List<string>();
-        public Queue<byte[]> byteQueue = new Queue<byte[]>();
+        Queue<Tuple<byte[], string>> byteQueue = new Queue<Tuple<byte[], string>>();
 
         private async void Awake()
         {
@@ -154,7 +153,15 @@ namespace com.example
         {
             if (byteQueue.Count > 0)
             {
-                Texture2D texture = ConvertToTexture2D(byteQueue.Dequeue());
+                Tuple<byte[], string> item = byteQueue.Dequeue();
+                Texture2D texture = ConvertToTexture2D(item.Item1);
+                foreach(GameObject cloth in clothes)
+                {
+                    if(cloth.name == item.Item2)
+                    {
+                        cloth.transform.Find("ClothImage").GetComponent<Image>().sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f); ;
+                    }
+                }
                 resultImages.Add(texture);
             }
         }
@@ -164,33 +171,34 @@ namespace com.example
             await supabase.From<user_result>().On(PostgresChangesOptions.ListenType.All, (sender, change) =>
             {
                 string resultPath = change.Model<user_result>().result_img;
+                string resultId = change.Model<user_result>().product_id.ToString();
                 string keyword = "db438da4-6bc4-4c10-9bde-6b52fab38e4f/";
                 int startIndex = resultPath.IndexOf(keyword);
                 string sub_url = "";
                 sub_url = resultPath.Substring(startIndex);
-                urls.Add(sub_url);
                 Debug.Log(sub_url);
-                DownResultImage();
+                DownResultImage(sub_url, resultId);
             });
         }
         
-        public async void DownResultImage()
+        public async void DownResultImage(string url, string resultId)
         {
-            var result_image = await supabase.Storage.From("user_result").Download(urls[0], null);
-            byteQueue.Enqueue(result_image);
+            var result_image = await supabase.Storage.From("user_result").Download(url, null);
+            byteQueue.Enqueue(new Tuple<byte[], string>(result_image, resultId));
         }
+
         public async void UserResultTableUpload()  // 결과 이미지 다운로드 부분
         {
             var model = new user_result()
             {
                 user_id = "db438da4-6bc4-4c10-9bde-6b52fab38e4f",
                 product_id = 1,
-                result_img = "https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_result/db438da4-6bc4-4c10-9bde-6b52fab38e4f/result_1.jpg"
+                result_img = "https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_result/db438da4-6bc4-4c10-9bde-6b52fab38e4f/1_result.jpg"
             };
 
             await supabase.From<user_result>().Upsert(model);
         }
-        // https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_result/db438da4-6bc4-4c10-9bde-6b52fab38e4f/result_1.jpg
+        // https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_result/db438da4-6bc4-4c10-9bde-6b52fab38e4f/1_result.jpg
 
         public async void GetProductPath()  //using StartBtn in InitPanel
         {

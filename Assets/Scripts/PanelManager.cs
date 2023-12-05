@@ -18,6 +18,12 @@ public class PanelManager : MonoBehaviour
     {
         MeasurePanel.SetActive(false);
     }
+
+    public void OnMeasurePanel()
+    {
+        MeasurePanel.SetActive(true);
+    }
+
     public void OnMainPanel(){
         MainPanel.SetActive(true);
     }
@@ -36,8 +42,17 @@ public class PanelManager : MonoBehaviour
     }
     public void OnVirtualFittingPanel()
     {
-        VirtualFittingPanel.SetActive(true);
+        RectTransform rectTransform = VirtualFittingPanel.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = Vector3.zero; // (0, 0, 0)으로 설정 
+        //VirtualFittingPanel.SetActive(true);
     }
+    public void OffVIrtualFittingPanel()
+    {
+        RectTransform rectTransform = VirtualFittingPanel.GetComponent<RectTransform>();
+        rectTransform.anchoredPosition = new Vector3(-700f,0f,0f); // (0, 0, 0)으로 설정
+        //VirtualFittingPanel.SetActive(false);
+    }
+    
     public void OnSettingPanel()
     {
         SettingPanel.SetActive(true);
@@ -63,10 +78,7 @@ public class PanelManager : MonoBehaviour
     {
         LoginPanel.SetActive(false);
     }
-    public void OffVIrtualFittingPanel()
-    {
-        VirtualFittingPanel.SetActive(false);
-    }
+    
     public void OffSettingPanel()
     {
         SettingPanel.SetActive(false);

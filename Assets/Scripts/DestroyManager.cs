@@ -23,6 +23,8 @@ public class DestroyManager : MonoBehaviour
     public GameObject lSleevePraceHolder;
     public GameObject recommendPraceHolder;
 
+    public GameObject webCamCaptureImage;
+
     public void InitAllObjects()
     {
         for (int i = basketContent.childCount - 1; i >= 0; i--)
@@ -49,13 +51,10 @@ public class DestroyManager : MonoBehaviour
         sSleevePraceHolder.SetActive(true);
         lSleevePraceHolder.SetActive(true);
         recommendPraceHolder.SetActive(true);
-        // InitCurrentPrice(); 이것도 삭제해줘야함
+
+        webCamCaptureImage.SetActive(false);
+        //CurrentPrice InitCurrentPrice(); 이것도 삭제해줘야함 
 
 
     }
-    
-
-    //basketclothes 변수도 삭제 ?
-
-
 }
