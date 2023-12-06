@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Client = Supabase.Client;
 using FileOptions = Supabase.Storage.FileOptions;
+using System.Linq;
 
 namespace com.example
 {
@@ -224,6 +225,8 @@ namespace com.example
             products = productPaths.Models;
             product_imgs = productImages.Models;
 
+            products = products.OrderBy(p => p.id).ToList();
+            product_imgs = product_imgs.OrderBy(p => p.id).ToList();
 
             int idx = 0;
             foreach (var product_img in product_imgs)
@@ -325,12 +328,6 @@ namespace com.example
                 instance.name = product.id.ToString();
             }
         }
-        
-        
-
-
-
-
         public async void SubscribeUserSizeTable()
         {
             await supabase.From<user_size>().On(PostgresChangesOptions.ListenType.All, (sender, change) =>
