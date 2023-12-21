@@ -216,7 +216,6 @@ namespace com.example
             await supabase.From<user_result>().Upsert(model);
         }
         // https://gjlvbikvkbtasqrcpsbf.supabase.co/storage/v1/object/public/user_result/db438da4-6bc4-4c10-9bde-6b52fab38e4f/1_result.jpg
-
         public async void GetProductPath()  //using StartBtn in InitPanel
         {
             var productPaths = await supabase.From<product>().Get();
