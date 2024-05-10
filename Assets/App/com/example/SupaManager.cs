@@ -176,7 +176,8 @@ namespace com.example
                 {
                     if(cloth.name == item.Item2)
                     {
-                        cloth.transform.Find("ClothImage").GetComponent<Image>().sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f); ;
+                        cloth.transform.Find("ClothImage").GetComponent<Image>().sprite = 
+                            Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f);
                     }
                 }
                 resultImages.Add(texture);
